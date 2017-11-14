@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type ="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script>
+        $('document').ready(()=>{
+            var socket = io.connect();
+            var user;
+            while(!user || user==""){
+                var user = prompt("Please enter a user name.");
+            }
+            if(user){
+                socket.emit("new_user", {id: "", user_name: user});
+                }
+            socket.on("updates", (updates)=>{
+                $("#updates").empty();
+                $('#updates').append("<legend>Updates</legend>")
+                for(let i=0;i<updates.length;i++){
+                    $("#updates").append("<p>", updates[i], "</p>");
+                }
+            })
+            socket.on("posts", (posts)=>{
+                $("#chatbox").empty();
+                $('#chatbox').append("<legend>Chat Room</legend>")
+                for(let i=0;i<posts.length;i++){
+                    $('#chatbox').append("<p>", posts[i].user, " says: ", posts[i].post, "</p>");
+                }
+            })
+            $('#post_msg').click(()=>{
+                var msg = $("textarea[name='msg_box']").val();
+                if(msg != ""){
+                    socket.emit("new_post", {post: msg, user: user});
+                    $("textarea[name='msg_box']").val("");
+                }
+            })
+        })
+    </script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Challenge: Socket Chat</title>
+</head>
+<body>
+    <div id="main">
+        <div id="display">
+            <fieldset id="chatbox">
+            </fieldset>
+            <fieldset id="updates">
+            </fieldset>
+        </div>
+        <div id="input">
+            <textarea id="msg_box" name="msg_box" placeholder="Enter your text here"></textarea>
+            <button id="post_msg">Send</button>
+        </div>
+    </div>
+</body>
+</html>
